@@ -66,26 +66,36 @@ def main():
 
         dias_ferias = functions.dias_restantes_ferias(dia_ferias_dot, mes_ferias_dot, ano_ferias_dot)
         mensagem = functions.mensagens_enviar(dias_ferias)
+        hora_agora = datetime.now().hour
 
-        if ultimo_post == mensagem: # Verifica se o último post é igual a mensagem que será enviada
-            print("Um post já foi realizado hoje.")
-            webhook = DiscordWebhook(url=webhook_url_dot, content='Um post já foi realizado hoje.')
+        # Verifica se o último post é igual a mensagem que esta tentando ser enviada
+        if ultimo_post == mensagem:
+            print("O post do dia já foi enviado.")
+            webhook = DiscordWebhook(url=webhook_url_dot, content='O post do dia já foi enviado.')
             webhook.execute()
 
-        
-        elif dias_ferias < -1: # Verifica se as férias já começaram
+        # Verifica se as férias já começaram
+        elif dias_ferias <= -2:
             print("As férias já começaram, nenhuma nova postagem será enviada.")
-            print("Lembre-se de atualizar o dia, mês e ano das férias no arquivo .env")
+            print("Lembre-se de atualizar o dia, mês e ano das férias no arquivo .env ou no site do repl.it")
             webhook = DiscordWebhook(url=webhook_url_dot, content='As férias já começaram, nenhuma nova postagem será enviada.')
             webhook.execute()
-            webhook = DiscordWebhook(url=webhook_url_dot, content='Lembre-se de atualizar a data das férias / retorno das aulas no arquivo .env')
+            webhook = DiscordWebhook(url=webhook_url_dot, content='Lembre-se de atualizar o dia, mês e ano das férias no arquivo .env ou no site do repl.it')
             webhook.execute()
 
+        # Verifica se é um horário válido para postar
+        elif not (hora_agora >= 8 and hora_agora <= 12):
+            print("Uma postagem esta disponível para ser realizada, mas o horário ainda não foi atingido.")
+            webhook = DiscordWebhook(url=webhook_url_dot, content='Uma postagem esta disponível para ser realizada, mas o horário ainda não foi atingido.')
+            webhook.execute()
 
-        else: # Caso os requisitos sejam atendidos, o post é realizado (ou seja, o último post não é igual a mensagem que será enviada e as férias ainda não começaram)
+        # Caso os requisitos sejam atendidos, o post é realizado (ou seja, o último post não é igual a mensagem que será enviada, as férias ainda não começaram e é um horário válido para postar)
+        else:
             api.update_status(mensagem)
             print("Um novo post acaba de ser realizado.")
             webhook = DiscordWebhook(url=webhook_url_dot, content='Um novo post acaba de ser realizado.')
+            print(f'Conteúdo do post: {mensagem}')
+            webhook = DiscordWebhook(url=webhook_url_dot, content=f'Conteúdo do post: {mensagem}')
             webhook.execute()
 
         sleep(600) # Delay de 10 minutos (600 segundos) para verificar novamente os requisitos para realizar um novo post

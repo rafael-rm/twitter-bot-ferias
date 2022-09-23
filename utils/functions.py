@@ -1,5 +1,4 @@
 from datetime import date
-from time import sleep
 
 # Contar os dias restantes até uma determinada data
 def dias_restantes_ferias(dia_ferias, mes_ferias, ano_ferias):
