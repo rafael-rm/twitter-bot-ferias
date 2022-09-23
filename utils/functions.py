@@ -1,13 +1,14 @@
 from datetime import date
 from time import sleep
 
+# Contar os dias restantes até uma determinada data
 def dias_restantes_ferias(dia_ferias, mes_ferias, ano_ferias):
     data_hoje = date.today()
     data_ferias = date(ano_ferias, mes_ferias, dia_ferias)
     delta = data_ferias - data_hoje
     return delta.days
 
-# Qual mensagem será enviada
+# Verificar qual mensagem deve ser postada
 def mensagens_enviar(dias_restantes):
     if dias_restantes == -1:
         mensagem = "Finalmente as férias começaram!"

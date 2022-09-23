@@ -6,6 +6,7 @@ from time import sleep
 from discord_webhook import DiscordWebhook
 import utils.functions as functions
 
+# USAR NO LOCALHOST
 # Carregando as variáveis de ambiente
 dotenv.load_dotenv(dotenv.find_dotenv())
 access_token_dot = os.getenv("ACESS_TOKEN")
@@ -55,30 +56,36 @@ except Exception as e:
 # Função main
 def main():
 
-    # Loopin
+    # Loopin infinito
     while True:
+
         timeline = api.user_timeline()
         ultimo_post = timeline[0].text
         dias_ferias = functions.dias_restantes_ferias(dia_ferias_dot, mes_ferias_dot, ano_ferias_dot)
         mensagem = functions.mensagens_enviar(dias_ferias)
-        print(dias_ferias)
-        if ultimo_post == mensagem:
+
+        if ultimo_post == mensagem: # Verifica se o último post é igual a mensagem que será enviada
             print("Um post já foi realizado hoje.")
             webhook = DiscordWebhook(url=webhook_url_dot, content='Um post já foi realizado hoje.')
             webhook.execute()
-        elif dias_ferias < -1:
+
+        
+        elif dias_ferias < -1: # Verifica se as férias já começaram
             print("As férias já começaram, nenhuma nova postagem será enviada.")
             print("Lembre-se de atualizar o dia, mês e ano das férias no arquivo .env")
             webhook = DiscordWebhook(url=webhook_url_dot, content='As férias já começaram, nenhuma nova postagem será enviada.')
             webhook.execute()
             webhook = DiscordWebhook(url=webhook_url_dot, content='Lembre-se de atualizar a data das férias / retorno das aulas no arquivo .env')
             webhook.execute()
-        else:
+
+
+        else: # Caso os requisitos sejam atendidos, o post é realizado (ou seja, o último post não é igual a mensagem que será enviada e as férias ainda não começaram)
             api.update_status(mensagem)
             print("Um novo post acaba de ser realizado.")
             webhook = DiscordWebhook(url=webhook_url_dot, content='Um novo post acaba de ser realizado.')
             webhook.execute()
-        sleep(600)
+
+        sleep(600) # Delay de 10 minutos (600 segundos) para verificar novamente os requisitos para realizar um novo post
 
 if __name__ == "__main__":
     main()
