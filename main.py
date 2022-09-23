@@ -56,11 +56,14 @@ except Exception as e:
 # Função main
 def main():
 
-    # Loopin infinito
     while True:
 
         timeline = api.user_timeline()
-        ultimo_post = timeline[0].text
+        if len(timeline) > 0:
+            ultimo_post = timeline[0].text
+        else:
+            ultimo_post = ''
+
         dias_ferias = functions.dias_restantes_ferias(dia_ferias_dot, mes_ferias_dot, ano_ferias_dot)
         mensagem = functions.mensagens_enviar(dias_ferias)
 
