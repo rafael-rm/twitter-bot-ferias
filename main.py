@@ -82,7 +82,7 @@ def main():
                 webhook.execute()
 
             # Verifica se as férias já começaram
-            elif dias_ferias <= -2:
+            elif dias_ferias < 0:
                 print("As férias já começaram, nenhuma nova postagem será enviada.")
                 print("Lembre-se de atualizar o dia, mês e ano das férias no arquivo .env ou no site do repl.it")
                 webhook = DiscordWebhook(url=webhook_url_dot, content='As férias já começaram, nenhuma nova postagem será enviada.')
