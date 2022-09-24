@@ -101,6 +101,7 @@ def main():
                 api.update_status(mensagem)
                 print("Um novo post acaba de ser realizado.")
                 webhook = DiscordWebhook(url=webhook_url_dot, content='Um novo post acaba de ser realizado.')
+                webhook.execute()
                 print(f'Conteúdo do post: {mensagem}')
                 webhook = DiscordWebhook(url=webhook_url_dot, content=f'Conteúdo do post: {mensagem}')
                 webhook.execute()
