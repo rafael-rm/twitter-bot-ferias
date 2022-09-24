@@ -7,9 +7,7 @@ from pytz import timezone
 def dias_restantes_ferias(dia_ferias, mes_ferias, ano_ferias):
 
     # Pegar a data atual na timezone de São Paulo e converter para o formato date
-    data_hoje = date.today()
-    data_hoje = datetime(data_hoje.year, data_hoje.month, data_hoje.day)
-    data_hoje = timezone('America/Sao_Paulo').localize(data_hoje)
+    data_hoje = datetime.now(timezone('America/Sao_Paulo'))
     data_hoje = data_hoje.date()
 
     # Pegar a data das férias na timezone de São Paulo e converter para o formato date
