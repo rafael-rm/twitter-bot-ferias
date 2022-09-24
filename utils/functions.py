@@ -28,6 +28,8 @@ def mensagens_enviar(dias_restantes):
         mensagem = f"Restam apenas {dias_restantes} dias de sofrimento!"
     elif dias_restantes <= 20:
         mensagem = f"Estamos na contagem regressiva para as férias! Faltam {dias_restantes} dias."
+    elif dias_restantes <= 30:
+        mensagem = f"Faltam apenas {dias_restantes} dias para as férias!"
     else:
         mensagem = f"Faltam {dias_restantes} dias para as férias!"
     return mensagem
