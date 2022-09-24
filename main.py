@@ -5,6 +5,7 @@ from datetime import datetime
 from time import sleep
 from discord_webhook import DiscordWebhook
 import utils.functions as functions
+from pytz import timezone
 
 # USAR NO LOCALHOST
 # Carregando as variáveis de ambiente
@@ -18,12 +19,12 @@ data_ferias_dot = os.getenv("DATA_FERIAS")
 
 # USAR NO REPL.IT
 # Carregando as variáveis de ambiente
-# access_token_dot = os.environ['ACESS_TOKEN']
-# access_token_secret_dot = os.environ['ACESS_TOKEN_SECRET']
-# consumer_key_dot = os.environ['CONSUMER_KEY']
-# consumer_secret_dot = os.environ['CONSUMER_SECRET']
-# webhook_url_dot = os.environ['WEBHOOK_URL']
-# data_ferias_dot  = os.environ['DATA_FERIAS'] 
+#access_token_dot = os.environ['ACESS_TOKEN']
+#access_token_secret_dot = os.environ['ACESS_TOKEN_SECRET']
+#consumer_key_dot = os.environ['CONSUMER_KEY']
+#consumer_secret_dot = os.environ['CONSUMER_SECRET']
+#webhook_url_dot = os.environ['WEBHOOK_URL']
+#data_ferias_dot  = os.environ['DATA_FERIAS'] 
 
 access_token_dot = str(access_token_dot)
 access_token_secret_dot = str(access_token_secret_dot)
@@ -53,6 +54,7 @@ except Exception as e:
     webhook = DiscordWebhook(url=webhook_url_dot, content=e)
     webhook.execute()
 
+
 # Função main
 def main():
 
@@ -66,7 +68,10 @@ def main():
 
         dias_ferias = functions.dias_restantes_ferias(dia_ferias_dot, mes_ferias_dot, ano_ferias_dot)
         mensagem = functions.mensagens_enviar(dias_ferias)
-        hora_agora = datetime.now().hour
+
+        # Pegar a hora atual na timezone de São Paulo
+        hora_atual = datetime.now(timezone('America/Sao_Paulo'))
+        hora_atual = hora_atual.strftime("%H")
 
         # Verifica se o último post é igual a mensagem que esta tentando ser enviada
         if ultimo_post == mensagem:
@@ -84,7 +89,7 @@ def main():
             webhook.execute()
 
         # Verifica se é um horário válido para postar
-        elif not (hora_agora >= 8 and hora_agora <= 12):
+        elif not (hora_atual >= 8 and hora_atual <= 12):
             print("Uma postagem esta disponível para ser realizada, mas o horário ainda não foi atingido.")
             webhook = DiscordWebhook(url=webhook_url_dot, content='Uma postagem esta disponível para ser realizada, mas o horário ainda não foi atingido.')
             webhook.execute()
