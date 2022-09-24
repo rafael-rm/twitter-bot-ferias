@@ -72,6 +72,7 @@ def main():
         # Pegar a hora atual na timezone de São Paulo
         hora_atual = datetime.now(timezone('America/Sao_Paulo'))
         hora_atual = hora_atual.strftime("%H")
+        hora_atual = int(hora_atual)
 
         # Verifica se o último post é igual a mensagem que esta tentando ser enviada
         if ultimo_post == mensagem:
