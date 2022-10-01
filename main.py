@@ -16,7 +16,7 @@ consumer_key_dot = os.getenv("CONSUMER_KEY")
 consumer_secret_dot = os.getenv("CONSUMER_SECRET")
 webhook_url_dot = os.getenv("WEBHOOK_URL")
 data_ferias_dot = os.getenv("DATA_FERIAS")
-data_inicio_dot = os.getenv("DATA_inicio")
+data_inicio_dot = os.getenv("DATA_INICIO")
 
 # USAR NO REPL.IT
 # Carregando as variáveis de ambiente
@@ -26,7 +26,7 @@ data_inicio_dot = os.getenv("DATA_inicio")
 #consumer_secret_dot = os.environ['CONSUMER_SECRET']
 #webhook_url_dot = os.environ['WEBHOOK_URL']
 #data_ferias_dot  = os.environ['DATA_FERIAS'] 
-#data_inicio_dot = os.environ['DATA_inicio']
+#data_inicio_dot = os.environ['DATA_INICIO']
 
 access_token_dot = str(access_token_dot)
 access_token_secret_dot = str(access_token_secret_dot)
