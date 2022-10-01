@@ -3,24 +3,26 @@ from datetime import datetime
 from pytz import timezone
 
 
-# Contar os dias restantes até uma determinada data
-def dias_restantes_ferias(dia_ferias, mes_ferias, ano_ferias):
+# Contar a diferença entre as datas
+def diferenca_de_dias(dia, mes, ano):
 
     # Pegar a data atual na timezone de São Paulo e converter para o formato date
     data_hoje = datetime.now(timezone('America/Sao_Paulo'))
     data_hoje = data_hoje.date()
 
     # Pegar a data das férias na timezone de São Paulo e converter para o formato date
-    data_ferias = date(ano_ferias, mes_ferias, dia_ferias)
+    data = date(ano, mes, dia)
 
     # Calcular a diferença entre as datas
-    delta = data_ferias - data_hoje
+    delta = data - data_hoje
     return delta.days
 
 
 # Verificar qual mensagem deve ser postada
-def mensagens_enviar(dias_restantes):
-    if dias_restantes <= 0:
+def mensagens_enviar(dias_restantes, dias_inicio):
+    if dias_inicio == 0:
+        mensagem = f"Hoje é o primeiro dia de longos {dias_restantes} dias até as férias. Boa sorte a todos!"
+    elif dias_restantes <= 0:
         mensagem = "Finalmente as férias começaram!!"
     elif dias_restantes == 1:
         mensagem = "Hoje é o último dia de aula!!"

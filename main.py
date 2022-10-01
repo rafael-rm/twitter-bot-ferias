@@ -16,6 +16,7 @@ consumer_key_dot = os.getenv("CONSUMER_KEY")
 consumer_secret_dot = os.getenv("CONSUMER_SECRET")
 webhook_url_dot = os.getenv("WEBHOOK_URL")
 data_ferias_dot = os.getenv("DATA_FERIAS")
+data_inicio_dot = os.getenv("DATA_inicio")
 
 # USAR NO REPL.IT
 # Carregando as variáveis de ambiente
@@ -25,6 +26,7 @@ data_ferias_dot = os.getenv("DATA_FERIAS")
 #consumer_secret_dot = os.environ['CONSUMER_SECRET']
 #webhook_url_dot = os.environ['WEBHOOK_URL']
 #data_ferias_dot  = os.environ['DATA_FERIAS'] 
+#data_inicio_dot = os.environ['DATA_inicio']
 
 access_token_dot = str(access_token_dot)
 access_token_secret_dot = str(access_token_secret_dot)
@@ -35,6 +37,11 @@ data_ferias_temp = datetime.strptime(data_ferias_dot, "%d/%m/%Y")
 dia_ferias_dot = data_ferias_temp.day
 mes_ferias_dot = data_ferias_temp.month
 ano_ferias_dot = data_ferias_temp.year
+
+data_inicio_temp = datetime.strptime(data_inicio_dot, "%d/%m/%Y")
+dia_inicio = data_inicio_temp.day
+mes_inicio = data_inicio_temp.month
+ano_inicio = data_inicio_temp.year
 
 auth = tweepy.OAuthHandler(consumer_key_dot, consumer_secret_dot)
 auth.set_access_token(access_token_dot, access_token_secret_dot)
@@ -67,38 +74,49 @@ def main():
             else:
                 ultimo_post = ''
 
-            dias_ferias = functions.dias_restantes_ferias(dia_ferias_dot, mes_ferias_dot, ano_ferias_dot)
-            mensagem = functions.mensagens_enviar(dias_ferias)
+            dias_ferias = functions.diferenca_de_dias(dia_ferias_dot, mes_ferias_dot, ano_ferias_dot)
+            dias_inicio = functions.diferenca_de_dias(dia_inicio, mes_inicio, ano_inicio)
+            
+            mensagem = functions.mensagens_enviar(dias_ferias, dias_inicio)
 
             # Pegar a hora atual na timezone de São Paulo
             hora_atual = datetime.now(timezone('America/Sao_Paulo'))
             hora_atual = hora_atual.strftime("%H")
             hora_atual = int(hora_atual)
 
+            # Verificar se o inicio das aulas já começou
+            if dias_inicio > 0:
+                print(f"O dia de retorno as aulas nao chegou, faltam {dias_inicio} dia/s.")
+                webhook = DiscordWebhook(url=webhook_url_dot, content=f'O dia de retorno as aulas nao chegou, faltam {dias_inicio} dia/s.')
+                webhook.execute()
+
             # Verifica se o último post é igual a mensagem que esta tentando ser enviada
-            if ultimo_post == mensagem:
+            elif ultimo_post == mensagem:
                 print("O post do dia já foi enviado.")
+                print("Conteúdo do post: " + ultimo_post)
                 webhook = DiscordWebhook(url=webhook_url_dot, content='O post do dia já foi enviado.')
+                webhook.execute()
+                webhook = DiscordWebhook(url=webhook_url_dot, content='Conteúdo do post: ' + ultimo_post)
                 webhook.execute()
 
             # Verifica se as férias já começaram
             elif dias_ferias < 0:
                 print("As férias já começaram, nenhuma nova postagem será enviada.")
-                print("Lembre-se de atualizar o dia, mês e ano das férias no arquivo .env ou no site do repl.it")
+                print("Lembre-se de atualizar as datas no arquivo .env ou no site do repl.it")
                 webhook = DiscordWebhook(url=webhook_url_dot, content='As férias já começaram, nenhuma nova postagem será enviada.')
                 webhook.execute()
-                webhook = DiscordWebhook(url=webhook_url_dot, content='Lembre-se de atualizar o dia, mês e ano das férias no arquivo .env ou no site do repl.it')
+                webhook = DiscordWebhook(url=webhook_url_dot, content='Lembre-se de atualizar as datas no arquivo .env ou no site do repl.it')
                 webhook.execute()
 
             # Verifica se é um horário válido para postar
-            elif not (hora_atual >= 8 and hora_atual <= 12):
-                print("Uma postagem esta disponível para ser realizada, mas o horário ainda não foi atingido.")
-                webhook = DiscordWebhook(url=webhook_url_dot, content='Uma postagem esta disponível para ser realizada, mas o horário ainda não foi atingido.')
+            elif not (hora_atual >= 7 and hora_atual <= 15):
+                print("Uma postagem esta disponível para ser realizada, mas o horário ideal para postar ainda não foi atingido.")
+                webhook = DiscordWebhook(url=webhook_url_dot, content='Uma postagem esta disponível para ser realizada, mas o horário ideal para postar ainda não foi atingido.')
                 webhook.execute()
 
             # Caso os requisitos sejam atendidos, o post é realizado (ou seja, o último post não é igual a mensagem que será enviada, as férias ainda não começaram e é um horário válido para postar)
             else:
-                api.update_status(mensagem)
+                #api.update_status(mensagem)
                 print("Um novo post acaba de ser realizado.")
                 webhook = DiscordWebhook(url=webhook_url_dot, content='Um novo post acaba de ser realizado.')
                 webhook.execute()
@@ -106,7 +124,7 @@ def main():
                 webhook = DiscordWebhook(url=webhook_url_dot, content=f'Conteúdo do post: {mensagem}')
                 webhook.execute()
 
-            sleep(3600) # Delay de 1 hora (3600 segundos) para verificar novamente os requisitos para realizar um novo post
+            sleep(7200) # Delay de 2 hora (7200 segundos) para verificar novamente os requisitos para realizar um novo post
         
         except Exception as e:
             print("Erro durante a execução do programa, tentando novamente em 15 minutos. \nErro: ")
