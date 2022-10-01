@@ -116,7 +116,7 @@ def main():
 
             # Caso os requisitos sejam atendidos, o post é realizado (ou seja, o último post não é igual a mensagem que será enviada, as férias ainda não começaram e é um horário válido para postar)
             else:
-                #api.update_status(mensagem)
+                api.update_status(mensagem)
                 print("Um novo post acaba de ser realizado.")
                 webhook = DiscordWebhook(url=webhook_url_dot, content='Um novo post acaba de ser realizado.')
                 webhook.execute()
