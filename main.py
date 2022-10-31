@@ -7,100 +7,78 @@ from discord_webhook import DiscordWebhook
 import utils.functions as functions
 from pytz import timezone
 
-# USAR NO LOCALHOST
-# Carregando as variáveis de ambiente
-dotenv.load_dotenv(dotenv.find_dotenv())
-access_token_dot = os.getenv("ACESS_TOKEN")
-access_token_secret_dot = os.getenv("ACESS_TOKEN_SECRET")
-consumer_key_dot = os.getenv("CONSUMER_KEY")
-consumer_secret_dot = os.getenv("CONSUMER_SECRET")
-webhook_url_dot = os.getenv("WEBHOOK_URL")
-data_ferias_dot = os.getenv("DATA_FERIAS")
-data_inicio_dot = os.getenv("DATA_INICIO")
 
-# USAR NO REPL.IT
-# Carregando as variáveis de ambiente
-#access_token_dot = os.environ['ACESS_TOKEN']
-#access_token_secret_dot = os.environ['ACESS_TOKEN_SECRET']
-#consumer_key_dot = os.environ['CONSUMER_KEY']
-#consumer_secret_dot = os.environ['CONSUMER_SECRET']
-#webhook_url_dot = os.environ['WEBHOOK_URL']
-#data_ferias_dot  = os.environ['DATA_FERIAS'] 
-#data_inicio_dot = os.environ['DATA_INICIO']
-
-access_token_dot = str(access_token_dot)
-access_token_secret_dot = str(access_token_secret_dot)
-consumer_key_dot = str(consumer_key_dot)
-consumer_secret_dot = str(consumer_secret_dot)
-
-data_ferias_temp = datetime.strptime(data_ferias_dot, "%d/%m/%Y")
-dia_ferias_dot = data_ferias_temp.day
-mes_ferias_dot = data_ferias_temp.month
-ano_ferias_dot = data_ferias_temp.year
-
-data_inicio_temp = datetime.strptime(data_inicio_dot, "%d/%m/%Y")
-dia_inicio = data_inicio_temp.day
-mes_inicio = data_inicio_temp.month
-ano_inicio = data_inicio_temp.year
-
-auth = tweepy.OAuthHandler(consumer_key_dot, consumer_secret_dot)
-auth.set_access_token(access_token_dot, access_token_secret_dot)
-api = tweepy.API(auth)
-
-# Verificar se a autenticação foi bem sucedida
-try:
-    api.verify_credentials()
-    print("Autenticação bem sucedida")
-    webhook = DiscordWebhook(url=webhook_url_dot, content='Aplicação autenticada com sucesso.')
-    webhook.execute()
-except Exception as e:
-    print("Erro durante a autenticação\n")
-    print(e)
-    webhook = DiscordWebhook(url=webhook_url_dot, content='Erro durante a autenticação.')
-    webhook.execute()
-    webhook = DiscordWebhook(url=webhook_url_dot, content=e)
-    webhook.execute()
+DATA_INICIO_AULAS = "08/09/2022"
+DATA_INICIO_FERIAS = "19/12/2022"
 
 
-# Função main
 def main():
+    dotenv.load_dotenv(dotenv.find_dotenv())
+    access_token_dot = str(os.getenv("ACESS_TOKEN"))
+    access_token_secret_dot = str(os.getenv("ACESS_TOKEN_SECRET"))
+    consumer_key_dot = str(os.getenv("CONSUMER_KEY"))
+    consumer_secret_dot = str(os.getenv("CONSUMER_SECRET"))
+    webhook_url_dot = str(os.getenv("WEBHOOK_URL"))
+
+    data_ferias_temp = datetime.strptime(DATA_INICIO_FERIAS, "%d/%m/%Y")
+    dia_ferias = data_ferias_temp.day
+    mes_ferias = data_ferias_temp.month
+    ano_ferias = data_ferias_temp.year
+
+    data_inicio_temp = datetime.strptime(DATA_INICIO_AULAS, "%d/%m/%Y")
+    dia_inicio_aulas = data_inicio_temp.day
+    mes_inicio_aulas = data_inicio_temp.month
+    ano_inicio_aulas = data_inicio_temp.year
+
+    auth = tweepy.OAuthHandler(consumer_key_dot, consumer_secret_dot)
+    auth.set_access_token(access_token_dot, access_token_secret_dot)
+    api = tweepy.API(auth)
+
+    # Verificar se a autenticação foi bem sucedida
+    try:
+        api.verify_credentials()
+        print("Autenticação bem sucedida")
+        webhook = DiscordWebhook(url=webhook_url_dot, content='Aplicação autenticada com sucesso.')
+        webhook.execute()
+    except Exception as e:
+        print("Erro durante a autenticação\n")
+        print(e)
+        webhook = DiscordWebhook(url=webhook_url_dot, content='Erro durante a autenticação.')
+        webhook.execute()
+        webhook = DiscordWebhook(url=webhook_url_dot, content=e)
+        webhook.execute()
 
     while True:
-
         try:
-            timeline = api.user_timeline()
+            timeline = api.user_timeline(tweet_mode="extended")
             if len(timeline) > 0:
-                ultimo_post = timeline[0].text
+                ultimo_post = timeline[0].full_text
             else:
                 ultimo_post = ''
 
-            dias_ferias = functions.diferenca_de_dias(dia_ferias_dot, mes_ferias_dot, ano_ferias_dot)
-            dias_inicio = functions.diferenca_de_dias(dia_inicio, mes_inicio, ano_inicio)
+            dias_inicio_ferias = functions.diferenca_de_dias(dia_ferias, mes_ferias, ano_ferias)
+            dias_inicio_aulas = functions.diferenca_de_dias(dia_inicio_aulas, mes_inicio_aulas, ano_inicio_aulas)
             
-            mensagem = functions.mensagens_enviar(dias_ferias, dias_inicio)
+            mensagem = functions.mensagens_enviar(dias_inicio_ferias, dias_inicio_aulas)
 
-            # Pegar a hora atual na timezone de São Paulo
             hora_atual = datetime.now(timezone('America/Sao_Paulo'))
             hora_atual = hora_atual.strftime("%H")
             hora_atual = int(hora_atual)
 
             # Verificar se o inicio das aulas já começou
-            if dias_inicio > 0:
-                print(f"O dia de retorno as aulas nao chegou, faltam {dias_inicio} dia/s.")
-                webhook = DiscordWebhook(url=webhook_url_dot, content=f'O dia de retorno as aulas nao chegou, faltam {dias_inicio} dia/s.')
+            if dias_inicio_aulas > 0:
+                print(f"O dia de retorno as aulas nao chegou, faltam {dias_inicio_aulas} dia/s.")
+                webhook = DiscordWebhook(url=webhook_url_dot, content=f'O dia de retorno as aulas nao chegou, faltam {dias_inicio_aulas} dia/s.')
                 webhook.execute()
 
             # Verifica se o último post é igual a mensagem que esta tentando ser enviada
             elif ultimo_post == mensagem:
                 print("O post do dia já foi enviado.")
-                print("Conteúdo do post: " + ultimo_post)
                 webhook = DiscordWebhook(url=webhook_url_dot, content='O post do dia já foi enviado.')
-                webhook.execute()
-                webhook = DiscordWebhook(url=webhook_url_dot, content='Conteúdo do post: ' + ultimo_post)
                 webhook.execute()
 
             # Verifica se as férias já começaram
-            elif dias_ferias < 0:
+            elif dias_inicio_ferias < 0:
                 print("As férias já começaram, nenhuma nova postagem será enviada.")
                 print("Lembre-se de atualizar as datas no arquivo .env ou no site do repl.it")
                 webhook = DiscordWebhook(url=webhook_url_dot, content='As férias já começaram, nenhuma nova postagem será enviada.')
@@ -109,7 +87,7 @@ def main():
                 webhook.execute()
 
             # Verifica se é um horário válido para postar
-            elif not (hora_atual >= 7 and hora_atual <= 15):
+            elif not (hora_atual >= 7 and hora_atual <= 20):
                 print("Uma postagem esta disponível para ser realizada, mas o horário ideal para postar ainda não foi atingido.")
                 webhook = DiscordWebhook(url=webhook_url_dot, content='Uma postagem esta disponível para ser realizada, mas o horário ideal para postar ainda não foi atingido.')
                 webhook.execute()
